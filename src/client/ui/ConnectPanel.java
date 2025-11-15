@@ -6,7 +6,7 @@ import java.awt.*;
 class ConnectPanel extends JPanel {
     private GameFrame parent;
     JTextField ipField, portField, nickField;
-    JButton connectBtn, quickBtn;
+    JButton connectBtn, exitBtn;
 
     public ConnectPanel(GameFrame parent) {
         this.parent = parent;
@@ -62,14 +62,14 @@ class ConnectPanel extends JPanel {
         connectBtn.setBounds(420, 350, 190, 45);
         add(connectBtn);
 
-        quickBtn = new RoundedButton("빠른 시작");
-        quickBtn.setBounds(630, 350, 190, 45);
-        add(quickBtn);
+        exitBtn = new RoundedButton("게임종료");
+        exitBtn.setBounds(630, 350, 190, 45);
+        add(exitBtn);
 
         // ======================
         // ACTION
         // ======================
         connectBtn.addActionListener(e -> parent.showLobby());
-        quickBtn.addActionListener(e -> parent.showRoom());
+        exitBtn.addActionListener(e -> System.exit(0));
     }
 }
