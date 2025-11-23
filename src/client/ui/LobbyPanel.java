@@ -30,7 +30,7 @@ class LobbyPanel extends JPanel {
         JButton createBtn = new RoundedButton("새로운 방 만들기");
         createBtn.setBounds(350, 460, 250, 50);
         createBtn.addActionListener(e -> {
-            String roomName = JOptionPane.showInputDialog(
+            String roomName = JOptionPane.showInputDialog( //사용자에게 문자열을 입력받는 팝업창을 띄우는 함수
                     parent,
                     "방 이름을 입력하세요",
                     "새 방 만들기",
@@ -51,26 +51,26 @@ class LobbyPanel extends JPanel {
         });
         add(createBtn);
 
-        JButton disconnectBtn = new RoundedButton("접속 종료");
-        disconnectBtn.setBounds(680, 460, 250, 50);
-        disconnectBtn.addActionListener(e -> {
+        JButton quickBtn = new RoundedButton("접속 종료");
+        quickBtn.setBounds(680, 460, 250, 50);
+        quickBtn.addActionListener(e -> {
             parent.disconnectFromServer();   // 서버 소켓 종료
             parent.showConnect();            // 접속 화면으로 이동
         });
 
-        add(disconnectBtn);
+        add(quickBtn);
     }
 
     // 서버에서 ROOM_LIST 수신 → 여기로
     public void updateRooms(String[] rooms) {
 
-        // ★ 아무 방도 없는 경우
-        if (rooms.length == 0 ||
+        //  아무 방도 없는 경우
+        if (rooms.length == 0 || // rooms 배열이 비었거나 rooms 배열에는 하나 있는데 그 값이 빈 문자열일 경우
                 (rooms.length == 1 && rooms[0].trim().isEmpty())) {
 
-            roomListContainer.removeAll();
-            roomListContainer.revalidate();
-            roomListContainer.repaint();
+            roomListContainer.removeAll(); // roomListContainer 안에 들어있는 컴포넌트들 제거
+            roomListContainer.revalidate(); // 레이아웃 재계산
+            roomListContainer.repaint(); // 화면 다시 그리기
             return;
         }
 
@@ -101,8 +101,8 @@ class LobbyPanel extends JPanel {
             roomListContainer.add(row);
         }
 
-        roomListContainer.revalidate();
-        roomListContainer.repaint();
+        roomListContainer.revalidate(); // 레이아웃 재계산
+        roomListContainer.repaint(); // 화면 다시 그리기
     }
 
 }

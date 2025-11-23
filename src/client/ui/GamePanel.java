@@ -19,10 +19,7 @@ public class GamePanel extends JPanel {
         setLayout(null);
         setBackground(new Color(240, 240, 240));
         setPreferredSize(new Dimension(1280, 720));
-
-        // ==============================
-        // 1) 채팅창
-        // ==============================
+        // 채팅창
         chatPanel = new ChattingPanel();
         chatPanel.setBounds(20, 20, 250, 600);
         add(chatPanel);
@@ -39,10 +36,7 @@ public class GamePanel extends JPanel {
                 parent.getNetwork().send(msg);
             }
         });
-
-        // ==============================
-        // 2) 중앙 보드 (상대 3 + 나 1)
-        // ==============================
+        // 중앙 보드 (상대 3 + 나 1)
         boardArea = new JPanel(null);
         boardArea.setBounds(290, 20, 670, 680);
         boardArea.setBackground(new Color(240, 240, 240));
@@ -63,9 +57,7 @@ public class GamePanel extends JPanel {
         }
         boardArea.add(createMyPlayerRow(3, pos[3][0], pos[3][1], boxW, boxH));
 
-        // ==============================
         // 3) 오른쪽 패널
-        // ==============================
         rightPanel = new JPanel(null);
         rightPanel.setBounds(980, 20, 260, 680);
         rightPanel.setBackground(new Color(245,245,245));
@@ -73,13 +65,10 @@ public class GamePanel extends JPanel {
 
         // 카드 덱 이미지
         ImageIcon stackIcon = null;
-        try {
-            stackIcon = new ImageIcon(
-                    getClass().getResource("/client/ui/img/card_stack.png")
-            );
-        } catch (Exception e) {
-            System.out.println("이미지 로딩 실패: card_stack.png");
-        }
+        stackIcon = new ImageIcon(
+                getClass().getResource("/client/ui/img/card_stack.png")
+        );
+        System.out.println("이미지 로딩 실패: card_stack.png");
 
         if (stackIcon != null) {
             Image scaled = stackIcon.getImage().getScaledInstance(140, 140, Image.SCALE_SMOOTH);
@@ -169,27 +158,16 @@ public class GamePanel extends JPanel {
     }
 
     private ImageIcon loadImage(String path, int w, int h) {
-        try {
-            ImageIcon icon = new ImageIcon(getClass().getResource(path));
-            Image scaled = icon.getImage().getScaledInstance(w, h, Image.SCALE_SMOOTH);
-            return new ImageIcon(scaled);
-        } catch (Exception e) {
-            System.out.println("이미지 로딩 실패: " + path);
-            return null;
-        }
+        ImageIcon icon = new ImageIcon(getClass().getResource(path));
+        Image scaled = icon.getImage().getScaledInstance(w, h, Image.SCALE_SMOOTH);
+        return new ImageIcon(scaled);
     }
-
-    // =============================
     // 네트워크 → 채팅창 반영
-    // =============================
     public void addChat(String line) {
         chatPanel.appendChat(line);
     }
-
-    // =============================
     // 네트워크 → 보드 상태 갱신
     // (지금은 TODO, 나중에 hp, stones 보고 그리면 됨)
-    // =============================
     public void updateBoard(GameMsg msg) {
         // TODO: 서버에서 실제 게임 상태 보내줄 때 쓰임
 

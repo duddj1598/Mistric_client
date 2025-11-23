@@ -42,17 +42,11 @@ public class GameFrame extends JFrame {
 
         showConnect();
     }
-
-    // =========================
     // 네트워크 / 닉네임 접근자
-    // =========================
     public ClientNetwork getNetwork() { return clientNetwork; }
 
     public String getNick() { return nick; }
-
-    // =========================
     // 서버 접속 시도
-    // =========================
     public void connectToServer(String ip, int port, String nick) {
         this.nick = nick; // 내가 누군지 저장
 
@@ -60,16 +54,13 @@ public class GameFrame extends JFrame {
 
         // showLobby()는 서버에서 LOGIN_OK가 왔을 때 처리
         if (!ok) {
-            JOptionPane.showMessageDialog(this, "서버 연결 실패!");
+            JOptionPane.showMessageDialog(this, "서버 연결 실패!"); // 사용자에게 팝업창을 띄우는 함수
         }
     }
-
-    // =========================
     // 서버에서 온 메시지에 따른 화면/데이터 갱신
-    // =========================
     public void updateLobbyRoomList(GameMsg msg) {
         if (msg.text != null) {
-            String[] rooms = msg.text.split("\\|");
+            String[] rooms = msg.text.split("\\|"); // | 를 기준으로 문자열 나누기
             lobbyPanel.updateRooms(rooms);
         }
     }
@@ -99,18 +90,13 @@ public class GameFrame extends JFrame {
         showGame();
         gamePanel.updateBoard(msg);
     }
-
-    // =========================
     // 화면 전환
-    // =========================
     public void showConnect() { cardLayout.show(container, "CONNECT"); }
     public void showLobby()   { cardLayout.show(container, "LOBBY"); }
     public void showRoom()    { cardLayout.show(container, "ROOM"); }
     public void showGame()    { cardLayout.show(container, "GAME"); }
 
-    // =========================
-    // 서버 연결 끊기 (나중에 로비→접속화면 돌아갈 때 사용 가능)
-    // =========================
+    // 서버 연결 끊기 (로비→접속화면 돌아갈 때 사용 가능)
     public void disconnectFromServer() {
         if (clientNetwork != null) {
             clientNetwork.close();

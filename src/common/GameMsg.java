@@ -40,7 +40,7 @@ public class GameMsg implements Serializable {
     public int[][] stones;       // 마법의 돌 정보 (각 플레이어 5개)
     public int remainStones;     // 남은 돌
 
-    // 이미지 메시지를 위해 (필요하면)
+    // 이미지 메시지 (필요하면)
     public ImageIcon image;
 
     // =============== 생성자 ===============
