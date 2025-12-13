@@ -75,7 +75,6 @@ public class ClientNetwork {
             }
         });
 
-        receiverThread.setDaemon(true);
         receiverThread.start();
     }
     // 서버 → 클라이언트 메시지 처리

@@ -64,13 +64,13 @@ class LobbyPanel extends JPanel {
     // 서버에서 ROOM_LIST 수신 → 여기로
     public void updateRooms(String[] rooms) {
 
-        // ★ 아무 방도 없는 경우
-        if (rooms.length == 0 ||
+        //  아무 방도 없는 경우
+        if (rooms.length == 0 || // rooms 배열이 비었거나 rooms 배열에는 하나 있는데 그 값이 빈 문자열일 경우
                 (rooms.length == 1 && rooms[0].trim().isEmpty())) {
 
-            roomListContainer.removeAll();
-            roomListContainer.revalidate();
-            roomListContainer.repaint();
+            roomListContainer.removeAll(); // roomListContainer 안에 들어있는 컴포넌트들 제거
+            roomListContainer.revalidate(); // 레이아웃 재계산
+            roomListContainer.repaint(); // 화면 다시 그리기
             return;
         }
 
@@ -101,8 +101,8 @@ class LobbyPanel extends JPanel {
             roomListContainer.add(row);
         }
 
-        roomListContainer.revalidate();
-        roomListContainer.repaint();
+        roomListContainer.revalidate(); // 레이아웃 재계산
+        roomListContainer.repaint(); // 화면 다시 그리기
     }
 
 }
