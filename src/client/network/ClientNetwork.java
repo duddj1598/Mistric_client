@@ -23,6 +23,7 @@ public class ClientNetwork {
     public ClientNetwork(GameFrame parent) {
         this.parent = parent;
     }
+
     // 서버 연결
     public boolean connect(String ip, int port, String nick) {
         try {
@@ -41,11 +42,12 @@ public class ClientNetwork {
             return true;
 
         } catch (IOException e) {
-            e.printStackTrace(); //에러를 콘솔에 출력
+            e.printStackTrace();
             connected = false;
             return false;
         }
     }
+
     // 메시지 전송
     public void send(GameMsg msg) {
         if (!connected) return;
@@ -56,6 +58,7 @@ public class ClientNetwork {
             System.out.println("메시지 전송 실패: " + e.getMessage());
         }
     }
+
     // 수신 스레드
     private void startReceiver() {
         receiverThread = new Thread(() -> {
@@ -77,6 +80,7 @@ public class ClientNetwork {
 
         receiverThread.start();
     }
+
     // 서버 → 클라이언트 메시지 처리
     private void handleMessage(GameMsg msg) {
 
@@ -84,24 +88,48 @@ public class ClientNetwork {
             switch (msg.mode) {
 
                 case GameMsg.LOGIN_OK -> {
-                    // 로그인 성공 → 로비로 이동 요청
+                    // 로그인 성공 → 로비로 이동
                     parent.showLobby();
                 }
 
                 case GameMsg.ROOM_LIST -> {
+                    // 방 목록 업데이트
                     parent.updateLobbyRoomList(msg);
                 }
 
                 case GameMsg.ROOM_UPDATE -> {
+                    // 방 플레이어 목록 업데이트
                     parent.updateRoomPlayers(msg);
                 }
 
                 case GameMsg.CHAT, GameMsg.CHAT_SYSTEM -> {
+                    // 채팅 메시지
                     parent.updateChat(msg);
                 }
 
-                case GameMsg.GAME_STATE, GameMsg.GAME_START -> {
+                case GameMsg.GAME_START -> {
+                    // 게임 시작 (게임 화면으로 전환)
+                    parent.showGame();
+                }
+
+                case GameMsg.GAME_STATE -> {
+                    // 게임 상태 업데이트 (HP, 손패 등)
                     parent.updateGameState(msg);
+                }
+
+                case GameMsg.TURN -> {
+                    // 턴 알림
+                    parent.updateTurn(msg);
+                }
+
+                case GameMsg.SPELL_RESULT -> {
+                    // 마법 시전 결과
+                    parent.showSpellResult(msg);
+                }
+
+                case GameMsg.GAME_END -> {
+                    // 게임 종료
+                    parent.handleGameEnd(msg);
                 }
 
                 default -> {
@@ -110,6 +138,7 @@ public class ClientNetwork {
             }
         });
     }
+
     // 종료
     public void close() {
         try {

@@ -17,10 +17,10 @@ public class GameFrame extends JFrame {
     private GamePanel gamePanel;
 
     private ClientNetwork clientNetwork;
-    private String nick; // 내 닉네임
+    private String nick;
 
     public GameFrame() {
-        setTitle("아브라카왓 멀티 - UI Prototype");
+        setTitle("아브라카왓 멀티 - 클라이언트");
         setSize(1280, 720);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
@@ -42,25 +42,25 @@ public class GameFrame extends JFrame {
 
         showConnect();
     }
+
     // 네트워크 / 닉네임 접근자
     public ClientNetwork getNetwork() { return clientNetwork; }
-
     public String getNick() { return nick; }
+
     // 서버 접속 시도
     public void connectToServer(String ip, int port, String nick) {
-        this.nick = nick; // 내가 누군지 저장
-
+        this.nick = nick;
         boolean ok = clientNetwork.connect(ip, port, nick);
 
-        // showLobby()는 서버에서 LOGIN_OK가 왔을 때 처리
         if (!ok) {
-            JOptionPane.showMessageDialog(this, "서버 연결 실패!"); // 사용자에게 팝업창을 띄우는 함수
+            JOptionPane.showMessageDialog(this, "서버 연결 실패!");
         }
     }
+
     // 서버에서 온 메시지에 따른 화면/데이터 갱신
     public void updateLobbyRoomList(GameMsg msg) {
         if (msg.text != null) {
-            String[] rooms = msg.text.split("\\|"); // | 를 기준으로 문자열 나누기
+            String[] rooms = msg.text.split("\\|");
             lobbyPanel.updateRooms(rooms);
         }
     }
@@ -69,34 +69,54 @@ public class GameFrame extends JFrame {
         if (msg.text != null) {
             String[] players = msg.text.split("\\|");
             roomPanel.updatePlayers(players);
-            // 방 정보 받은 시점에 방 화면으로 이동
+
+            // 게임 패널에도 플레이어 정보 전달
+            gamePanel.setPlayers(players);
+
             showRoom();
         }
     }
 
     public void updateChat(GameMsg msg) {
         String line = msg.user + ": " + msg.text;
-
-        // 방에 있을 경우
         roomPanel.addChat(line);
-
-        // 게임 패널 채팅에도 표시
         gamePanel.addChat(line);
     }
-
 
     public void updateGameState(GameMsg msg) {
         // 게임 상태 수신 시 게임 화면으로 이동 + 보드 갱신
         showGame();
         gamePanel.updateBoard(msg);
     }
+
+    // 턴 알림
+    public void updateTurn(GameMsg msg) {
+        if (msg.text != null) {
+            gamePanel.updateTurn(msg.text);
+        }
+    }
+
+    // 마법 시전 결과
+    public void showSpellResult(GameMsg msg) {
+        if (msg.text != null) {
+            gamePanel.addChat("[시스템] " + msg.text);
+        }
+    }
+
+    // 게임 종료
+    public void handleGameEnd(GameMsg msg) {
+        if (msg.text != null) {
+            gamePanel.showGameEnd(msg.text);
+        }
+    }
+
     // 화면 전환
     public void showConnect() { cardLayout.show(container, "CONNECT"); }
     public void showLobby()   { cardLayout.show(container, "LOBBY"); }
     public void showRoom()    { cardLayout.show(container, "ROOM"); }
     public void showGame()    { cardLayout.show(container, "GAME"); }
 
-    // 서버 연결 끊기 (로비→접속화면 돌아갈 때 사용 가능)
+    // 서버 연결 끊기
     public void disconnectFromServer() {
         if (clientNetwork != null) {
             clientNetwork.close();
