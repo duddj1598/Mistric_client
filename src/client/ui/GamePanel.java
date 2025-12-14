@@ -20,16 +20,19 @@ public class GamePanel extends JPanel {
     private JPanel[] playerRows = new JPanel[4];
 
     private JLabel remainStonesLabel;
-    private JLabel currentTurnLabel;
 
     // 비밀의 돌
     private JLabel[] secretStones = new JLabel[4];
 
     private int myPlayerIndex = -1;
+    private int myServerIndex = -1;  // 서버에서의 내 인덱스
     private String currentTurnPlayer = "";
 
     private String[] playerNames = new String[4];
     private int myHandCount = 5;
+
+    // 서버 인덱스 → 화면 인덱스 매핑
+    private int[] serverToScreen = new int[4];
 
     public GamePanel(GameFrame parent) {
         this.parent = parent;
@@ -55,13 +58,6 @@ public class GamePanel extends JPanel {
         boardArea.setBounds(290, 20, 670, 680);
         boardArea.setBackground(new Color(240, 240, 240));
         add(boardArea);
-
-        // 현재 턴 표시
-        currentTurnLabel = new JLabel("게임 대기중...", SwingConstants.CENTER);
-        currentTurnLabel.setFont(new Font("맑은 고딕", Font.BOLD, 20));
-        currentTurnLabel.setBounds(0, 650, 670, 30);
-        currentTurnLabel.setForeground(new Color(255, 100, 100));
-        boardArea.add(currentTurnLabel);
 
         // 플레이어 행
         int boxW = 650;
@@ -158,45 +154,51 @@ public class GamePanel extends JPanel {
 
         int playerCount = Math.min(msg.hp.length, 4);
 
-        for (int i = 0; i < playerCount; i++) {
-            playerRows[i].setVisible(true);
-            playerHpLabels[i].setText("❤ " + msg.hp[i]);
+        // 서버 데이터를 화면 인덱스로 변환
+        for (int serverIdx = 0; serverIdx < playerCount; serverIdx++) {
+            int screenIdx = serverToScreen[serverIdx];
 
-            if (msg.hp[i] <= 0) {
-                playerRows[i].setBackground(new Color(100, 100, 100));
-                playerNameLabels[i].setText(playerNames[i] + " (탈락)");
+            playerRows[screenIdx].setVisible(true);
+            playerHpLabels[screenIdx].setText("❤ " + msg.hp[serverIdx]);
+
+            if (msg.hp[serverIdx] <= 0) {
+                playerRows[screenIdx].setBackground(new Color(100, 100, 100));
+                playerNameLabels[screenIdx].setText(playerNames[screenIdx] + " (탈락)");
             } else {
-                playerRows[i].setBackground(i == myPlayerIndex ?
-                        new Color(230, 234, 255) : new Color(255, 255, 255));
+                if (screenIdx == myPlayerIndex) {
+                    playerRows[screenIdx].setBackground(new Color(230, 234, 255)); // 파란색
+                } else {
+                    playerRows[screenIdx].setBackground(new Color(255, 255, 255));
+                }
             }
 
             int visibleCards = 0;
             for (int j = 0; j < 5; j++) {
-                if (j < msg.stones[i].length && msg.stones[i][j] != -1) {
-                    int cardValue = msg.stones[i][j];
+                if (j < msg.stones[serverIdx].length && msg.stones[serverIdx][j] != -1) {
+                    int cardValue = msg.stones[serverIdx][j];
 
-                    if (i == myPlayerIndex) {
+                    if (screenIdx == myPlayerIndex) {
                         // 내 손패: 뒷면
-                        playerStoneLabels[i][j].setIcon(loadTileImage("tile_back", 75, 110));
-                        playerStoneLabels[i][j].setText("");
+                        playerStoneLabels[screenIdx][j].setIcon(loadTileImage("tile_back", 75, 110));
+                        playerStoneLabels[screenIdx][j].setText("");
                     } else {
                         // 상대 손패: 공개
                         if (cardValue > 0 && cardValue <= 8) {
-                            playerStoneLabels[i][j].setIcon(loadTileImage("tile_" + cardValue, 75, 110));
-                            playerStoneLabels[i][j].setText("");
+                            playerStoneLabels[screenIdx][j].setIcon(loadTileImage("tile_" + cardValue, 75, 110));
+                            playerStoneLabels[screenIdx][j].setText("");
                         } else {
-                            playerStoneLabels[i][j].setIcon(loadTileImage("tile_back", 75, 110));
-                            playerStoneLabels[i][j].setText("");
+                            playerStoneLabels[screenIdx][j].setIcon(loadTileImage("tile_back", 75, 110));
+                            playerStoneLabels[screenIdx][j].setText("");
                         }
                     }
-                    playerStoneLabels[i][j].setVisible(true);
+                    playerStoneLabels[screenIdx][j].setVisible(true);
                     visibleCards++;
                 } else {
-                    playerStoneLabels[i][j].setVisible(false);
+                    playerStoneLabels[screenIdx][j].setVisible(false);
                 }
             }
 
-            if (i == myPlayerIndex) {
+            if (screenIdx == myPlayerIndex) {
                 myHandCount = visibleCards;
             }
         }
@@ -206,7 +208,7 @@ public class GamePanel extends JPanel {
             remainStonesLabel.setText("남은 돌: " + msg.remainStones);
         }
 
-        // 비밀의 돌 업데이트 (msg.text에서 파싱)
+        // 비밀의 돌 업데이트
         if (msg.text != null && !msg.text.isEmpty()) {
             updateSecretStones(msg.text);
         }
@@ -246,13 +248,24 @@ public class GamePanel extends JPanel {
     public void updateTurn(String playerName) {
         currentTurnPlayer = playerName;
 
+        // 모든 플레이어 테두리 초기화
+        for (int i = 0; i < 4; i++) {
+            if (playerRows[i].isVisible()) {
+                playerRows[i].setBorder(BorderFactory.createLineBorder(new Color(200, 200, 200), 2));
+            }
+        }
+
+        // 현재 턴 플레이어에게 빨간색 테두리
+        for (int i = 0; i < playerNames.length; i++) {
+            if (playerNames[i] != null && playerNames[i].equals(playerName)) {
+                playerRows[i].setBorder(BorderFactory.createLineBorder(new Color(255, 50, 50), 4));
+                break;
+            }
+        }
+
+        // 내 턴이면 팝업 표시 (문구 없이)
         if (playerName.equals(parent.getNick())) {
-            currentTurnLabel.setText(">>> 당신의 턴입니다! <<<");
-            currentTurnLabel.setForeground(new Color(255, 50, 50));
             SwingUtilities.invokeLater(() -> showSpellSelectionDialog());
-        } else {
-            currentTurnLabel.setText(playerName + "님의 턴");
-            currentTurnLabel.setForeground(new Color(100, 100, 255));
         }
     }
 
@@ -364,20 +377,52 @@ public class GamePanel extends JPanel {
     }
 
     public void setPlayers(String[] players) {
-        for (int i = 0; i < players.length && i < 4; i++) {
-            playerNames[i] = players[i];
-            playerNameLabels[i].setText(players[i]);
+        // 모든 행 초기화
+        for (int i = 0; i < 4; i++) {
+            playerRows[i].setVisible(false);
+            playerNames[i] = null;
+        }
 
+        // 내 서버 인덱스 찾기
+        myServerIndex = -1;
+        for (int i = 0; i < players.length; i++) {
             if (players[i].equals(parent.getNick())) {
-                myPlayerIndex = i;
-                playerRows[i].setBackground(new Color(230, 234, 255));
+                myServerIndex = i;
+                break;
             }
         }
+
+        if (myServerIndex == -1) return;
+
+        int playerCount = players.length;
+
+        // 나는 항상 3번 위치
+        myPlayerIndex = 3;
+
+        // 서버 순서대로 화면에 배치 (나는 제외하고 0번부터)
+        int screenIdx = 0;
+        for (int serverIdx = 0; serverIdx < playerCount; serverIdx++) {
+            if (serverIdx == myServerIndex) {
+                // 나는 3번 위치
+                serverToScreen[serverIdx] = 3;
+                playerNames[3] = players[serverIdx];
+                playerNameLabels[3].setText(players[serverIdx]);
+                playerRows[3].setVisible(true);
+                playerRows[3].setBackground(new Color(230, 234, 255)); // 파란색
+            } else {
+                // 다른 플레이어는 0번부터 순서대로
+                serverToScreen[serverIdx] = screenIdx;
+                playerNames[screenIdx] = players[serverIdx];
+                playerNameLabels[screenIdx].setText(players[serverIdx]);
+                playerRows[screenIdx].setVisible(true);
+                screenIdx++;
+            }
+        }
+
+        System.out.println("[플레이어 배치] 인원: " + playerCount + ", 내 서버 인덱스: " + myServerIndex + " → 화면 3번");
     }
 
     public void showGameEnd(String message) {
-        currentTurnLabel.setText("게임 종료: " + message);
-        currentTurnLabel.setForeground(new Color(255, 100, 100));
         JOptionPane.showMessageDialog(this, message, "게임 종료", JOptionPane.INFORMATION_MESSAGE);
     }
 
@@ -396,7 +441,6 @@ public class GamePanel extends JPanel {
             stone.setBackground(new Color(220, 220, 220));
         }
 
-        currentTurnLabel.setText("게임 대기중...");
         remainStonesLabel.setText("남은 돌: 36");
     }
 
