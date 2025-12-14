@@ -17,6 +17,7 @@ public class GameMsg implements Serializable {
     public static final int ROOM_CREATE = 0x11;    // 방 생성 요청
     public static final int ROOM_ENTER = 0x12;     // 방 입장 요청
     public static final int ROOM_UPDATE = 0x13;    // 방 내 플레이어 목록 갱신
+    public static final int ROOM_LEAVE = 0x14;
 
     public static final int CHAT = 0x20;           // 채팅
     public static final int CHAT_SYSTEM = 0x21;    // 시스템 메시지
@@ -25,6 +26,8 @@ public class GameMsg implements Serializable {
     public static final int GAME_STATE = 0x31;     // 게임 전체 상태 동기화
     public static final int CAST_SPELL = 0x32;     // 주문 외치기
     public static final int SPELL_RESULT = 0x33;   // 주문 결과
+    public static final int TURN = 0x34;           // 턴 알림 (추가)
+    public static final int GAME_END = 0x35;       // 게임 종료 (추가)
 
     public static final int DISCONNECT = 0xFF;     // 종료/연결 끊김
 
@@ -38,6 +41,10 @@ public class GameMsg implements Serializable {
     public int[] hp;             // 생명력 4명
     public int[][] stones;       // 마법의 돌 정보 (각 플레이어 5개)
     public int remainStones;     // 남은 돌
+
+    // 마법 시전 데이터 (추가)
+    public int handIndex;        // 선택한 손패 위치
+    public Integer targetId;     // 타겟 플레이어 ID (5번 마법용)
 
     // 이미지 메시지를 위해 (필요하면)
     public ImageIcon image;
